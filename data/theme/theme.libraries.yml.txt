@@ -1,0 +1,9 @@
+global-styling:
+   version: 1.0
+   css:
+    theme:
+      css/{{site_name}}.css : {}
+   js:
+      js/{{site_name}}.js : {}
+   dependencies:
+        - core/jquery

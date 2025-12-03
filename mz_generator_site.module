@@ -1,0 +1,160 @@
+<?php
+
+/**
+ * @file
+ * Contains site_manager.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\node\NodeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\Core\Entity\EntityInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
+/**
+ * Implements hook_help().
+ */
+function mz_generator_site_help($route_name, RouteMatchInterface $route_match)
+{
+  switch ($route_name) {
+    // Main module help for the site_manager module.
+    case 'help.page.mz_generator_site':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Manage web site') . '</p>';
+      return $output;
+    default:
+  }
+}
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ *
+ * Save the first value of field_article_tags to field_article_main_tag.
+ *
+ * @param \Drupal\node\NodeInterface $node
+ */
+
+function mz_generator_site_node_presave(NodeInterface $node)
+{
+  if ($node->getType() == 'mz_generator_site' && $node->isNew()) {
+    $title = $node->label();
+    $helper = \Drupal::service('drupal.helper');
+    $site_name = $helper->helper->generate_machine_name($title);
+    $id = $helper->node->getIdNodeByField('mz_generator_site', 'title', $site_name);
+    if (is_numeric($id)) {
+      $site_name = $site_name . '_' . $id;
+    }
+    $node->field_mz_generator_site_name->value = $site_name;
+    $st_domain_name = \Drupal::service('mz_generator_site.default')->domain_build($site_name);
+
+    $node->field_mz_generator_site_domain->value = $st_domain_name;
+  }
+}
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ *
+ * Save the first value of field_article_tags to field_article_main_tag.
+ *
+ * @param \Drupal\node\NodeInterface $node
+ */
+
+function mz_generator_site_node_insert(NodeInterface $node)
+{
+  if ($node->getType() == 'mz_generator_site') {
+    \Drupal::service('mz_generator_site.default')->process($node);
+  }
+}
+
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ *
+ * Save the first value of field_article_tags to field_article_main_tag.
+ *
+ * @param \Drupal\node\NodeInterface $node
+ */
+
+function mz_generator_site_node_delete(NodeInterface $node)
+{
+  if ($node->getType() == 'mz_generator_site') {
+    //    $site = new \Drupal\site_manager\SiteManager($node);
+    //    $site->deleteProcess() ;
+  }
+}
+
+
+
+
+function mz_generator_site_preprocess_node(&$variables)
+{
+  $node = $variables['elements']["#node"];
+  if ($variables["view_mode"] == "full" && is_object($node) && $node->bundle() == "mz_generator_site") {
+    $redirect_url = $node->field_mz_generator_site_domain->value;
+    $script = <<<JS
+      // JavaScript redirect after 3 seconds.
+      setTimeout(function() {
+        window.location.href = '$redirect_url';
+      }, 30);
+    JS;
+
+    // Attach the JavaScript code to the page.
+    $variables['#attached']['html_head'][] = [
+      [
+        '#type' => 'html_tag',
+        '#tag' => 'script',
+        '#value' => $script,
+      ],
+      'site_manager_redirect_script',
+    ];
+
+
+
+  }
+
+}
+
+function _updateImage(array &$form, FormStateInterface $form_state)
+{
+  $selected_option = $form_state->getValue('st_theme');
+  $image_path = '';
+
+  // Determine the image path based on the selected option.
+  if ($selected_option == "template_1") {
+    $path = 'https://template.staydirect.cloud';
+    $image = '/themes/custom/staydirect/theme1.jpg';
+    $title = 'Azure Bliss';
+    $text = 'Elevate your digital presence with Azure Bliss and let the calming waves of blue inspire confidence and connection.';
+
+  } elseif ($selected_option == "template_2") {
+    $path = 'https://template.staydirect.cloud';
+    $image = '/themes/custom/staydirect/theme2.jpg';
+    $title = 'Verdant Harmony';
+    $text = 'Experience the Verdant Harmony template and watch your online presence flourish in a world of sustainable design';
+
+  } elseif ($selected_option == "template_3") {
+    $path = 'https://template.staydirect.cloud';
+    $image = '/themes/custom/staydirect/theme3.jpg';
+    $title = 'Monochrome Elegance';
+    $text = 'Experience the enduring elegance of Monochrome Elegance and let your content shine against a backdrop of classic design. ';
+
+  }
+
+  // Add an image element to the form.
+  $html = _html_card_template($title, $text, $image, $path);
+  $form['image_wrapper']['image'] = [
+    '#markup' => $html,
+  ];
+  return $form['image_wrapper'];
+}
+function _html_card_template($title, $text, $image, $path)
+{
+  $html = '<div class="row card-main-template"><img class="col-md-6" src="' . $image . '"/>';
+  $html = $html . '<div class="col-md-6">';
+  $html = $html . '<h3 class="card-title"> ' . $title . '</h3>';
+  $html = $html . '<p class="card-text">' . $text . '</p>';
+  $html = $html . '<a href="' . $path . '" class="btn-template">Preview</a>';
+  $html = $html . '</div>';
+  $html = $html . '</div>';
+  return $html;
+}

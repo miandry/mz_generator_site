@@ -1,0 +1,118 @@
+        #block-staydirect-template-1-content form.user-login-form {
+            display: flex;
+            width: 100%;
+            overflow: hidden;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 25px;
+            flex-wrap : wrap ;
+            margin-top: 100px !important;
+            margin-bottom: 100px !important;
+        }
+        #block-staydirect-template-1-content form.user-login-form {
+            max-width: 575px;
+            margin: auto;
+        }
+        #block-staydirect-template-1-content form.user-login-form input[type="text"], #block-staydirect-template-1-content form.user-login-form input[type="password"] {
+
+           width: 100%;
+            padding: .375rem .75rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            color: rgba(51, 51, 51, 0.30) !important;
+            font-size: 18px !important;
+            font-family: "Kanit" !important;
+            font-style: normal;
+            font-weight: 400 !important;
+            line-height: 150% !important;
+            border-radius: 10px !important;
+            background: #F6F6F6 !important;
+            flex-shrink: 0 !important;
+            border: #dee2e6;
+            border-radius: 10px;
+            border: 1px solid rgba(51, 51, 51, 0.14) !important;     
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            color: rgba(51, 51, 51, 0.30);
+            border: none;
+        }
+        #block-staydirect-template-1-content form.user-login-form input[type="text"]:focus,  #block-staydirect-template-1-content form.user-login-form input[type="password"]:focus  {
+            color: var(--bs-body-color);
+            background-color: var(--bs-body-bg);
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+        }
+        #block-staydirect-template-1-content .form-actions {
+        	width: 100%;
+        }
+        #block-staydirect-template-1-content form.user-login-form input[type="submit"] {
+				    height: 60px;
+				    flex-shrink: 0;
+				    background: var(--bleu-color);
+				    color: #FFF;
+				    text-align: center;
+				    font-family: "Montserrat";
+				    font-size: 18px;
+				    font-style: normal;
+				    font-weight: 700;
+				    line-height: normal;
+				    border-radius: 50px;
+				    margin-top: 25px;
+				    border: none !important;
+				    width: 100%;
+        }
+        #block-staydirect-template-1-content form.user-login-form label {
+            color: rgba(51, 51, 51, 0.50);
+            font-size: 18px;
+            font-family: "Kanit";
+            font-style: normal;
+            font-weight: 400;
+            line-height: 150%;
+        }
+        #block-staydirect-template-1-content form.user-login-form .description {
+            color: rgba(51, 51, 51, 0.50);
+            font-family: "Kanit";
+            font-size: 13px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 150%;
+            margin: 5px;
+        }
+        #block-staydirect-template-1-content form.user-login-form .form-item {
+            margin-bottom: 25px;
+        }
+
+        #block-staydirect-template-1-content .description--register-forget {
+            position: absolute;
+            bottom: 190px;
+        }
+        #block-staydirect-template-1-content span a  {
+            color: rgba(51, 51, 51, 0.50);
+            font-family: "Kanit";
+            font-size: 13px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 150%;
+            margin: 5px;
+        }
+        @media (max-width: 499.98px) { 
+            #block-staydirect-template-1-content form.user-login-form {
+                max-width: 90%;
+            }
+        }
+
+        .user-login-form{
+            border: solid 1px red;
+            padding: 60px 80px;
+            border-radius: 7px;
+            box-shadow:  0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid #dee2e6!important;
+        }

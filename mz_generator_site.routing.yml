@@ -1,0 +1,19 @@
+mz_generator_site.settings:
+  path: '/admin/generator_sites/settings'
+  defaults:
+    _form: '\Drupal\mz_generator_site\Form\GenerateSiteSettingForm'
+    _title: 'Settings site manager'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
+
+mz_generator_site.process:
+  path: '/admin/generator_sites/execute'
+  defaults:
+    _form: '\Drupal\mz_generator_site\Form\GenerateSiteProcessForm'
+    _title: 'Process site manager'
+  requirements:
+    _permission: 'access content'
+
+  

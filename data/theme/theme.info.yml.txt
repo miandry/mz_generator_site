@@ -1,0 +1,9 @@
+name: {{site_name}}
+type: theme
+description: 'Theme {{site_name}} '
+package: Other
+core: 8.x
+libraries:
+  - {{site_name}}/global-styling
+ 
+base theme: platform_theme

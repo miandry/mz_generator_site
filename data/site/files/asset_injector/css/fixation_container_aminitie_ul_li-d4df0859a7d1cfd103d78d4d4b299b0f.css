@@ -1,0 +1,8 @@
+.container-aminitie ul li {
+	height : auto !important;
+}
+
+.container-aminitie .icon-link {
+    display: flex !important;
+    align-items: flex-start !important;
+}
