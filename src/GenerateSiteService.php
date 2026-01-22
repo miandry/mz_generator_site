@@ -98,7 +98,7 @@ class GenerateSiteService
         $this->generateSite($node);
         $this->configSiteDB($node);
         $this->configSite($node);
-        $result = \Drupal\mz_generator_site\GenerateSiteService::import($dbsource,$newDB);
+        $result = $this->import($dbsource,$newDB);
         if ($result['return'] === 0) {
             \Drupal::messenger()->addMessage('Database import succeeded.');
         } else {
@@ -432,7 +432,7 @@ class GenerateSiteService
         $external_url = "/node/" . $id;
         return new RedirectResponse($external_url);
     }
-    public static function import($dbsource, $dbname) {
+    public  function import($dbsource, $dbname) {
 
         $config = \Drupal::config("mz_generator_site.settings");
         $host = escapeshellarg($config->get('host'));
