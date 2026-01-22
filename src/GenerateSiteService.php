@@ -98,7 +98,7 @@ class GenerateSiteService
         $this->generateSite($node);
         $this->configSiteDB($node);
         $this->configSite($node);
-        $result = $this->import($dbsource,$newDB);
+        $result = \Drupal\mz_generator_site\GenerateSiteService::import($dbsource,$newDB);
         if ($result['return'] === 0) {
             \Drupal::messenger()->addMessage('Database import succeeded.');
         } else {
@@ -432,7 +432,7 @@ class GenerateSiteService
         $external_url = "/node/" . $id;
         return new RedirectResponse($external_url);
     }
-    public  function import($dbsource, $dbname) {
+    public static function import($dbsource, $dbname) {
 
         $config = \Drupal::config("mz_generator_site.settings");
         $host = escapeshellarg($config->get('host'));
@@ -451,7 +451,35 @@ class GenerateSiteService
             ];
         }
     
-        // Important: -p must be directly followed by the password, no space
+        /*
+         * 1. Remove the first line (often contains mysqldump warning)
+         * Linux:
+         *   sed -i '1d' file.sql
+         * macOS:
+         *   sed -i '' '1d' file.sql
+         *
+         * Use portable way by trying Linux syntax first.
+         */
+        $sedCmd = "sed -i '1d' {$sqlFileEsc} 2>&1";
+        exec($sedCmd, $sedOutput, $sedStatus);
+    
+        if ($sedStatus !== 0) {
+            // Try macOS variant
+            $sedCmdMac = "sed -i '' '1d' {$sqlFileEsc} 2>&1";
+            exec($sedCmdMac, $sedOutput, $sedStatus);
+    
+            if ($sedStatus !== 0) {
+                return [
+                    'return' => $sedStatus,
+                    'output' => ['Failed to clean SQL file header', implode("\n", $sedOutput)],
+                ];
+            }
+        }
+    
+        /*
+         * 2. Import database
+         * -p must be directly followed by the password
+         */
         $command = "mysql -h {$host} -u {$user} -p{$pass} {$db} < {$sqlFileEsc} 2>&1";
     
         $output = [];
@@ -459,11 +487,12 @@ class GenerateSiteService
         exec($command, $output, $status);
     
         return [
-            'return' => $status,
-            'output' => $output,
+            'return'  => $status,
+            'output'  => $output,
             'command' => $command,
         ];
     }
+    
     
     public static function import_old($dbsource,$dbname){
         ini_set('display_errors', 1);
