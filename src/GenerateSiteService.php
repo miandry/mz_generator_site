@@ -434,6 +434,11 @@ class GenerateSiteService
     }
     public static function import($dbsource, $dbname) {
 
+        \Drupal::logger('mz_generator_site')->notice(
+            'Starting database import. Source: @src, Target DB: @db',
+            ['@src' => $dbsource, '@db' => $dbname]
+        );
+    
         $config = \Drupal::config("mz_generator_site.settings");
         $host = escapeshellarg($config->get('host'));
         $user = escapeshellarg($config->get('user'));
@@ -445,53 +450,90 @@ class GenerateSiteService
         $sqlFileEsc = escapeshellarg($sqlFile);
     
         if (!file_exists($sqlFile) || filesize($sqlFile) === 0) {
-            return [
-                'return' => 1,
-                'output' => ['SQL file not found or empty: ' . $sqlFile],
-            ];
+            $msg = "SQL file not found or empty: {$sqlFile}";
+            \Drupal::messenger()->addMessage($msg, 'error');
+            \Drupal::logger('mz_generator_site')->error($msg);
+            return FALSE;
         }
     
         /*
-         * 1. Remove the first line (often contains mysqldump warning)
-         * Linux:
-         *   sed -i '1d' file.sql
-         * macOS:
-         *   sed -i '' '1d' file.sql
-         *
-         * Use portable way by trying Linux syntax first.
+         * 1. Clean first line of SQL file
          */
         $sedCmd = "sed -i '1d' {$sqlFileEsc} 2>&1";
         exec($sedCmd, $sedOutput, $sedStatus);
     
         if ($sedStatus !== 0) {
-            // Try macOS variant
+            // macOS fallback
             $sedCmdMac = "sed -i '' '1d' {$sqlFileEsc} 2>&1";
             exec($sedCmdMac, $sedOutput, $sedStatus);
     
             if ($sedStatus !== 0) {
-                return [
-                    'return' => $sedStatus,
-                    'output' => ['Failed to clean SQL file header', implode("\n", $sedOutput)],
-                ];
+                $msg = "Failed to clean SQL file before import.";
+                \Drupal::messenger()->addMessage(
+                    $msg . "<br><pre>" . implode("\n", $sedOutput) . "</pre>",
+                    'error'
+                );
+                \Drupal::logger('mz_generator_site')->error(
+                    '@msg Output: @out',
+                    [
+                        '@msg' => $msg,
+                        '@out' => implode("\n", $sedOutput),
+                    ]
+                );
+                return FALSE;
             }
         }
     
+        \Drupal::logger('mz_generator_site')->notice(
+            'SQL file cleaned successfully: @file',
+            ['@file' => $sqlFile]
+        );
+    
         /*
          * 2. Import database
-         * -p must be directly followed by the password
          */
         $command = "mysql -h {$host} -u {$user} -p{$pass} {$db} < {$sqlFileEsc} 2>&1";
+    
+        \Drupal::logger('mz_generator_site')->debug(
+            'Running MySQL import command: @cmd',
+            ['@cmd' => $command]
+        );
     
         $output = [];
         $status = 0;
         exec($command, $output, $status);
     
-        return [
-            'return'  => $status,
-            'output'  => $output,
-            'command' => $command,
-        ];
+        if ($status !== 0) {
+            $msg = "Database import failed for {$dbname}.";
+            \Drupal::messenger()->addMessage(
+                $msg . "<br><pre>" . implode("\n", $output) . "</pre>",
+                'error'
+            );
+            \Drupal::logger('mz_generator_site')->error(
+                '@msg Command: @cmd Output: @out',
+                [
+                    '@msg' => $msg,
+                    '@cmd' => $command,
+                    '@out' => implode("\n", $output),
+                ]
+            );
+            return FALSE;
+        }
+    
+        $msg = "Database import succeeded for {$dbname}.";
+        \Drupal::messenger()->addMessage($msg, 'status');
+        \Drupal::logger('mz_generator_site')->notice(
+            '@msg Source file: @file',
+            [
+                '@msg' => $msg,
+                '@file' => $sqlFile,
+            ]
+        );
+    
+        return TRUE;
     }
+    
+  
     
     
     public static function import_old($dbsource,$dbname){
