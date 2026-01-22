@@ -446,7 +446,42 @@ class GenerateSiteService
         // Check if the command was successful
         return ['return' => $return_var, 'output'=> $output];
     }
-    public static function dump($database){
+    public static function dump($database) {
+
+        $config = \Drupal::config("mz_generator_site.settings");
+        $host = escapeshellarg($config->get('host'));
+        $user = escapeshellarg($config->get('user'));
+        $pass = escapeshellarg($config->get('password'));
+        $db   = escapeshellarg($database);
+    
+        $path = \Drupal::service('file_system')->realpath('public://');
+        $file = $path . "/" . $database . ".sql";
+        $fileEsc = escapeshellarg($file);
+    
+        // 1. Dump database
+        $dumpCmd = "mysqldump --no-defaults --comments=FALSE --host={$host} --user={$user} --password={$pass} {$db} > {$fileEsc} 2>&1";
+        exec($dumpCmd, $output, $status);
+    
+        if ($status !== 0 || !file_exists($file) || filesize($file) === 0) {
+            \Drupal::messenger()->addMessage("Backup failed.", 'error');
+            \Drupal::logger('mz_generator_site')->error(implode("\n", $output));
+            return;
+        }
+    
+        // 2. Cleanup (macOS sed requires -i '')
+        $cleanCmd = "sed -i '' '/^--/d; /\\/\\*!/d' {$fileEsc} 2>&1";
+        exec($cleanCmd, $output2, $status2);
+    
+        if ($status2 !== 0) {
+            \Drupal::messenger()->addMessage("Backup created, but cleanup failed.", 'warning');
+            \Drupal::logger('mz_generator_site')->warning(implode("\n", $output2));
+            return;
+        }
+    
+        \Drupal::messenger()->addMessage("Backup and cleanup succeeded.");
+    }
+    
+    public static function dump12($database){
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
