@@ -460,11 +460,11 @@ class GenerateSiteService
         $dir =  $path . "/".$database.".sql";
         exec("mysqldump  --no-defaults --comments=FALSE  --user={$user} --password={$pass} --host={$host} {$database} --result-file={$dir}| sed '/^--/d'| sed -i '/\/\*!/d' 2>&1", $output,$status);
        // Check if mysqldump succeeded
-        if ($status === 0) {
+        if ($status == 0) {
             // Clean the file using sed
             $cmd2 = "sed -i '/\\/\\*!/d' {$dir} 2>&1";
             exec($cmd2, $output2, $status2);
-            if ($status2 === 0) {
+            if ($status2 == 0) {
                 $message =  "Backup and cleanup succeeded.";
                 \Drupal::messenger()->addMessage($message);
             } else {
@@ -475,9 +475,6 @@ class GenerateSiteService
             $message =  "Backup failed.";
             \Drupal::messenger()->addMessage($message,'error');
         }
-  
-         
-
-        
+          
     }
 }
