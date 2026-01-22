@@ -2,5 +2,5 @@ name: 'mz_generator_site'
 type: module
 description: 'Generate  site web in local'
 core: 8.x
-core_version_requirement: ^8 || ^9 || ^10.3 || ^11
+core_version_requirement: ^8 || ^9
 package: 'Custom'

@@ -1,0 +1,19 @@
+uuid: ca4e04f5-6a21-41c0-ac5a-6fde02c1a545
+langcode: fr
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_mz_generator_site_domain
+    - node.type.mz_generator_site
+id: node.mz_generator_site.field_mz_generator_site_domain
+field_name: field_mz_generator_site_domain
+entity_type: node
+bundle: mz_generator_site
+label: mz_generator_site_domain
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mz_generator_site module.
+ */
+
+use Drupal\mz_generator_site\NodeTypeInstaller;
+
+/**
+ * Implements hook_install().
+ */
+function mz_generator_site_install()
+{
+    // Use the NodeTypeInstaller helper to create the node type and fields programmatically.
+    NodeTypeInstaller::install();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function mz_generator_site_uninstall()
+{
+    // Use the NodeTypeInstaller helper to remove the node type and fields programmatically.
+     NodeTypeInstaller::uninstall();
+}
