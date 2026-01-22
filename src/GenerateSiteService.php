@@ -434,7 +434,7 @@ class GenerateSiteService
         $password =  $config->get('password');
 
         $path = \Drupal::service('file_system')->realpath('public://');
-        $sqlFile =  $path . "/data"."/".$dbsource.".sql";
+        $sqlFile =  $path ."/".$dbsource.".sql";
     
         // Command to import the database
         $command = "mysql -h $servername -u $username -p$password $dbname < $sqlFile";
