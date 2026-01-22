@@ -93,10 +93,12 @@ class GenerateSiteService
     public function process($node)
     {
         $newDB = $node->field_mz_generator_site_name->value;
+        $dbsource = $node->field_application->value;
         $this->createDatabase($newDB);
         $this->generateSite($node);
         $this->configSiteDB($node);
         $this->configSite($node);
+        \Drupal\mz_generator_site\GenerateSiteService::import($dbsource,$newDB);
         //  $this->cloneDatabaseContentV2($node->id(),$newDB);
     }
     function createDatabase($newDB)
@@ -422,7 +424,7 @@ class GenerateSiteService
         $external_url = "/node/" . $id;
         return new RedirectResponse($external_url);
     }
-    public static function import($dbname){
+    public static function import($dbsource,$dbname){
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
@@ -430,11 +432,9 @@ class GenerateSiteService
         $servername = $config->get('host'); // Replace with your server name
         $username = $config->get('user'); // Replace with your database username
         $password =  $config->get('password');
-  
 
-        $module_handler = \Drupal::service('module_handler');
-        $path = $module_handler->getModule('site_manager')->getPath();
-        $sqlFile = DRUPAL_ROOT . "/" . $path . "/data"."/".$dbname.".sql";
+        $path = \Drupal::service('file_system')->realpath('public://');
+        $sqlFile =  $path . "/data"."/".$dbsource.".sql";
     
         // Command to import the database
         $command = "mysql -h $servername -u $username -p$password $dbname < $sqlFile";
@@ -480,36 +480,5 @@ class GenerateSiteService
     
         \Drupal::messenger()->addMessage("Backup and cleanup succeeded.");
     }
-    
-    public static function dump12($database){
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
-
-        $config = \Drupal::config("mz_generator_site.settings");
-        $host = $config->get('host'); // Replace with your server name
-        $user = $config->get('user'); // Replace with your database username
-        $pass =  $config->get('password');
-
-        $path  = \Drupal::service('file_system')->realpath('public://');
-        $dir =  $path . "/".$database.".sql";
-        exec("mysqldump  --no-defaults --comments=FALSE  --user={$user} --password={$pass} --host={$host} {$database} --result-file={$dir}| sed '/^--/d'| sed -i '/\/\*!/d' 2>&1", $output,$status);
-       // Check if mysqldump succeeded
-        if ($status == 0) {
-            // Clean the file using sed
-            $cmd2 = "sed -i '/\\/\\*!/d' {$dir} 2>&1";
-            exec($cmd2, $output2, $status2);
-            if ($status2 == 0) {
-                $message =  "Backup and cleanup succeeded.";
-                \Drupal::messenger()->addMessage($message);
-            } else {
-                $message =  "Backup succeeded, but cleanup failed. ".$output2;
-                \Drupal::messenger()->addMessage($message,'error');
-            }
-        } else {
-            $message =  "Backup failed.";
-            \Drupal::messenger()->addMessage($message,'error');
-        }
-          
-    }
+ 
 }
