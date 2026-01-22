@@ -457,7 +457,7 @@ class GenerateSiteService
         $pass =  $config->get('password');
 
         $path  = \Drupal::service('file_system')->realpath('public://');
-        $dir = DRUPAL_ROOT . "/" . $path . "/".$database.".sql";
+        $dir =  $path . "/".$database.".sql";
         exec("mysqldump  --no-defaults --comments=FALSE  --user={$user} --password={$pass} --host={$host} {$database} --result-file={$dir}| sed '/^--/d'| sed -i '/\/\*!/d' 2>&1", $output,$status);
        // Check if mysqldump succeeded
         if ($status === 0) {
