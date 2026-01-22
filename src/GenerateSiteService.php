@@ -93,7 +93,7 @@ class GenerateSiteService
     public function process($node)
     {
         $newDB = $node->field_mz_generator_site_name->value;
-        $dbsource = $node->field_application->value;
+        $dbsource = $node->field_application->entity->label();
         $this->createDatabase($newDB);
         $this->generateSite($node);
         $this->configSiteDB($node);
