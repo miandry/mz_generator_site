@@ -98,7 +98,15 @@ class GenerateSiteService
         $this->generateSite($node);
         $this->configSiteDB($node);
         $this->configSite($node);
-        \Drupal\mz_generator_site\GenerateSiteService::import($dbsource,$newDB);
+        $result = \Drupal\mz_generator_site\GenerateSiteService::import($dbsource,$newDB);
+        if ($result['return'] === 0) {
+            \Drupal::messenger()->addMessage('Database import succeeded.');
+        } else {
+            \Drupal::messenger()->addMessage(
+                'Database import failed: ' . implode("\n", $result['output']),
+                'error'
+            );
+        }
         //  $this->cloneDatabaseContentV2($node->id(),$newDB);
     }
     function createDatabase($newDB)
@@ -424,7 +432,40 @@ class GenerateSiteService
         $external_url = "/node/" . $id;
         return new RedirectResponse($external_url);
     }
-    public static function import($dbsource,$dbname){
+    public static function import($dbsource, $dbname) {
+
+        $config = \Drupal::config("mz_generator_site.settings");
+        $host = escapeshellarg($config->get('host'));
+        $user = escapeshellarg($config->get('user'));
+        $pass = escapeshellarg($config->get('password'));
+        $db   = escapeshellarg($dbname);
+    
+        $path = \Drupal::service('file_system')->realpath('public://');
+        $sqlFile = $path . "/" . $dbsource . ".sql";
+        $sqlFileEsc = escapeshellarg($sqlFile);
+    
+        if (!file_exists($sqlFile) || filesize($sqlFile) === 0) {
+            return [
+                'return' => 1,
+                'output' => ['SQL file not found or empty: ' . $sqlFile],
+            ];
+        }
+    
+        // Important: -p must be directly followed by the password, no space
+        $command = "mysql -h {$host} -u {$user} -p{$pass} {$db} < {$sqlFileEsc} 2>&1";
+    
+        $output = [];
+        $status = 0;
+        exec($command, $output, $status);
+    
+        return [
+            'return' => $status,
+            'output' => $output,
+            'command' => $command,
+        ];
+    }
+    
+    public static function import_old($dbsource,$dbname){
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
