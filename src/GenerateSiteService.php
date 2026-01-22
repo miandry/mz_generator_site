@@ -470,14 +470,14 @@ class GenerateSiteService
             if ($sedStatus !== 0) {
                 $msg = "Failed to clean SQL file before import.";
                 \Drupal::messenger()->addMessage(
-                    $msg . "<br><pre>" . implode("\n", $sedOutput) . "</pre>",
+                    $msg . "<br><pre>" . $sedOutput . "</pre>",
                     'error'
                 );
                 \Drupal::logger('mz_generator_site')->error(
                     '@msg Output: @out',
                     [
                         '@msg' => $msg,
-                        '@out' => implode("\n", $sedOutput),
+                        '@out' =>  $sedOutput,
                     ]
                 );
                 return FALSE;
@@ -505,16 +505,12 @@ class GenerateSiteService
     
         if ($status !== 0) {
             $msg = "Database import failed for {$dbname}.";
-            \Drupal::messenger()->addMessage(
-                $msg . "<br><pre>" . implode("\n", $output) . "</pre>",
-                'error'
-            );
             \Drupal::logger('mz_generator_site')->error(
                 '@msg Command: @cmd Output: @out',
                 [
                     '@msg' => $msg,
                     '@cmd' => $command,
-                    '@out' => implode("\n", $output),
+                    '@out' => $output ,
                 ]
             );
             return FALSE;
